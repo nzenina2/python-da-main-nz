@@ -2894,6 +2894,7 @@ input::placeholder {
   line-height: 14px;
   padding: 0 25px 0 10px;
   text-align: left;
+  appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
 }
@@ -7454,6 +7455,24 @@ main {
 .jp-InputPrompt {
   flex: none;
 }
+/* --- fit the screen (fix 5) --- */
+.reveal img{
+  max-height: 58vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.reveal .jp-Cell{
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.reveal .jp-MarkdownCell .jp-InputPrompt{
+  display: none;
+}
+.reveal .fitwrap{
+  transform-origin: center center;
+  will-change: transform;
+}
 </style>
 </head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
@@ -8095,5 +8114,77 @@ require(
         Reveal.addEventListener('slidechanged', setScrollingSlide);
     }
 );
+</script>
+<script>
+// Shrink-to-fit: reveal.js does not scale a 100%x100% canvas, so a slide with
+// a lot of text plus a picture can run off the bottom. Every leaf slide gets its
+// content wrapped once in .fitwrap; if the wrapper is taller or wider than the
+// window, it is scaled down just enough to fit. Runs on ready, slide change and
+// resize, and again after MathJax has typeset formulas.
+require(["https://unpkg.com/reveal.js@4.0.2/dist/reveal.js"], function (Reveal) {
+  var MARGIN_V = 0.94, MARGIN_H = 0.98;
+
+  function leaves() {
+    return Array.prototype.filter.call(
+      document.querySelectorAll(".reveal .slides section"),
+      function (s) { return !s.querySelector(":scope > section"); }
+    );
+  }
+  function wrapOnce() {
+    leaves().forEach(function (sec) {
+      if (sec.querySelector(":scope > .fitwrap")) return;
+      var w = document.createElement("div");
+      w.className = "fitwrap";
+      while (sec.firstChild) w.appendChild(sec.firstChild);
+      sec.appendChild(w);
+    });
+  }
+  function fit(sec) {
+    if (!sec) return;
+    var w = sec.querySelector(":scope > .fitwrap");
+    if (!w) return;
+    var box = document.querySelector(".reveal");
+    var availH = box.clientHeight * MARGIN_V;
+    var availW = box.clientWidth * MARGIN_H;
+    // zoom (not transform) so the slide box really shrinks and reveal.js can
+    // still centre it vertically. Measured and corrected iteratively, because
+    // vh-based image caps change the content height when the zoom changes.
+    var k = 1;
+    w.style.zoom = "";
+    for (var pass = 0; pass < 5; pass++) {
+      var r = w.getBoundingClientRect();
+      if (!r.height || !r.width) return;
+      var f = Math.min(availH / r.height, availW / r.width);
+      if (f >= 0.995) break;
+      k = Math.max(0.3, k * f * 0.99);
+      w.style.zoom = k;
+    }
+  }
+  function relayout() { try { Reveal.layout(); } catch (e) {} }
+  // two passes: the first scales the slide, reveal.js then re-centres it, and
+  // the second pass corrects the rounding that centring introduces
+  function fitCurrent() {
+    var s = Reveal.getCurrentSlide();
+    fit(s); relayout(); fit(s); relayout();
+  }
+  function fitAll() {
+    var ls = leaves();
+    ls.forEach(fit); relayout();
+    ls.forEach(fit); relayout();
+  }
+
+  Reveal.on("ready", function () {
+    wrapOnce();
+    fitAll();
+    setTimeout(fitAll, 600);   // after MathJax
+    setTimeout(fitAll, 2000);
+  });
+  Reveal.on("slidechanged", function () {
+    wrapOnce();
+    fitCurrent();
+    setTimeout(fitCurrent, 250);
+  });
+  window.addEventListener("resize", function () { setTimeout(fitAll, 120); });
+});
 </script>
 </html>

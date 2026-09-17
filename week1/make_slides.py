@@ -18,6 +18,13 @@ Plain `jupyter nbconvert --to slides` is not enough - it needs four fixes:
   4. coloured spans  - nbconvert 7's markdown renderer turns
                        `__<span style="color:...">X</span>__` into an *empty*
                        span followed by X, so the colour is lost. Repaired here.
+  5. slides that       - with a 100% x 100% canvas reveal.js does not scale the
+     do not fit          content, so long slides (bullets + a large picture) run
+                         off the bottom of the screen. Two measures are injected:
+                         images are capped at 58% of the window height, and a
+                         shrink-to-fit script scales any slide that is still too
+                         big, on every slide change and window resize. Verified
+                         headless at 1920x1080.
 
 Requires: pip install nbconvert
 """
@@ -55,7 +62,99 @@ STYLE_BLOCK = """<style>
 .jp-InputPrompt {
   flex: none;
 }
+/* --- fit the screen (fix 5) --- */
+.reveal img{
+  max-height: 58vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.reveal .jp-Cell{
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.reveal .jp-MarkdownCell .jp-InputPrompt{
+  display: none;
+}
+.reveal .fitwrap{
+  transform-origin: center center;
+  will-change: transform;
+}
 </style>
+"""
+
+FIT_SCRIPT = """<script>
+// Shrink-to-fit: reveal.js does not scale a 100%%x100%% canvas, so a slide with
+// a lot of text plus a picture can run off the bottom. Every leaf slide gets its
+// content wrapped once in .fitwrap; if the wrapper is taller or wider than the
+// window, it is scaled down just enough to fit. Runs on ready, slide change and
+// resize, and again after MathJax has typeset formulas.
+require(["%(prefix)s/dist/reveal.js"], function (Reveal) {
+  var MARGIN_V = 0.94, MARGIN_H = 0.98;
+
+  function leaves() {
+    return Array.prototype.filter.call(
+      document.querySelectorAll(".reveal .slides section"),
+      function (s) { return !s.querySelector(":scope > section"); }
+    );
+  }
+  function wrapOnce() {
+    leaves().forEach(function (sec) {
+      if (sec.querySelector(":scope > .fitwrap")) return;
+      var w = document.createElement("div");
+      w.className = "fitwrap";
+      while (sec.firstChild) w.appendChild(sec.firstChild);
+      sec.appendChild(w);
+    });
+  }
+  function fit(sec) {
+    if (!sec) return;
+    var w = sec.querySelector(":scope > .fitwrap");
+    if (!w) return;
+    var box = document.querySelector(".reveal");
+    var availH = box.clientHeight * MARGIN_V;
+    var availW = box.clientWidth * MARGIN_H;
+    // zoom (not transform) so the slide box really shrinks and reveal.js can
+    // still centre it vertically. Measured and corrected iteratively, because
+    // vh-based image caps change the content height when the zoom changes.
+    var k = 1;
+    w.style.zoom = "";
+    for (var pass = 0; pass < 5; pass++) {
+      var r = w.getBoundingClientRect();
+      if (!r.height || !r.width) return;
+      var f = Math.min(availH / r.height, availW / r.width);
+      if (f >= 0.995) break;
+      k = Math.max(0.3, k * f * 0.99);
+      w.style.zoom = k;
+    }
+  }
+  function relayout() { try { Reveal.layout(); } catch (e) {} }
+  // two passes: the first scales the slide, reveal.js then re-centres it, and
+  // the second pass corrects the rounding that centring introduces
+  function fitCurrent() {
+    var s = Reveal.getCurrentSlide();
+    fit(s); relayout(); fit(s); relayout();
+  }
+  function fitAll() {
+    var ls = leaves();
+    ls.forEach(fit); relayout();
+    ls.forEach(fit); relayout();
+  }
+
+  Reveal.on("ready", function () {
+    wrapOnce();
+    fitAll();
+    setTimeout(fitAll, 600);   // after MathJax
+    setTimeout(fitAll, 2000);
+  });
+  Reveal.on("slidechanged", function () {
+    wrapOnce();
+    fitCurrent();
+    setTimeout(fitCurrent, 250);
+  });
+  window.addEventListener("resize", function () { setTimeout(fitAll, 120); });
+});
+</script>
 """
 
 
@@ -95,8 +194,14 @@ def patch_html(html_path: Path) -> None:
         r'<span style="([^"]*)"></span>([^<]+)', r'<span style="\1">\2</span>', s
     )
 
+    # 5. shrink-to-fit for slides that are still too tall
+    n_fit = 0
+    if "fitwrap" not in s.split("<body")[0] or "function fitCurrent" not in s:
+        s = s.replace("</html>", (FIT_SCRIPT % {"prefix": REVEAL_PREFIX}) + "</html>", 1)
+        n_fit = 1
+
     html_path.write_text(s, encoding="utf-8")
-    print(f"  patched: css=yes, slide-size={n_size}, coloured-spans={n_span}")
+    print(f"  patched: css=yes, slide-size={n_size}, coloured-spans={n_span}, fit-script={n_fit}")
 
     remote = re.findall(r'<img[^>]*src="(?!data:)([^"]*)"', s)
     if remote:
