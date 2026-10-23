@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2.3 Check yourself — Advanced Data Structures</title>
+<meta name="description" content="Warm-up game for M-227-04 Programming for Data Analytics: nested structures, graphs, trees and forests">
+<style>
+:root{
+  --bg:#f7f3f1; --panel:#ffffff; --ink:#201b1b; --muted:#6f6262; --line:#e7dcdc;
+  --accent:#a4161a; --accent-ink:#ffffff; --accent-soft:#f8e4e4;
+  --ok:#1d7a3b; --ok-soft:#e1f3e7; --bad:#b3261e; --bad-soft:#fbe3e1;
+  --warn:#8a5a00; --warn-soft:#fff1c9;
+  --dict:#2458c7; --dict-soft:#e3ebfb; --list:#c26a00; --list-soft:#fdebd6; --leaf:#1d7a3b;
+  --hl:#ffe08a; --hl-ink:#3b2a00;
+  --code-bg:#f2ecec; --code-ink:#201b1b; --str:#1d7a3b; --num:#2458c7; --kw:#a4161a; --cm:#8a7d7d;
+  --node:#ffffff; --node-ink:#201b1b; --node-stroke:#a4161a; --edge:#4a3f3f; --wbg:#ffffff;
+  --shadow:0 1px 2px rgba(40,10,10,.06),0 8px 24px rgba(60,20,20,.07);
+  --radius:16px;
+}
+:root[data-theme="dark"]{
+  --bg:#17121200; --bg:#171212; --panel:#221b1b; --ink:#f3ecec; --muted:#b3a4a4; --line:#3a2f2f;
+  --accent:#e2535a; --accent-ink:#1a0d0d; --accent-soft:#3a2224;
+  --ok:#5fd38a; --ok-soft:#1d3327; --bad:#ff7b72; --bad-soft:#3d2320;
+  --warn:#ffd36a; --warn-soft:#3a3014;
+  --dict:#7fa6ff; --dict-soft:#1f2a45; --list:#ffb15e; --list-soft:#3f2c15; --leaf:#5fd38a;
+  --hl:#5a4a12; --hl-ink:#ffe9a8;
+  --code-bg:#1a1414; --code-ink:#f3ecec; --str:#8ad7a3; --num:#8fb3ff; --kw:#ff8a8f; --cm:#8f8080;
+  --node:#2b2222; --node-ink:#f3ecec; --node-stroke:#e2535a; --edge:#cbbdbd; --wbg:#2b2222;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171212; --panel:#221b1b; --ink:#f3ecec; --muted:#b3a4a4; --line:#3a2f2f;
+    --accent:#e2535a; --accent-ink:#1a0d0d; --accent-soft:#3a2224;
+    --ok:#5fd38a; --ok-soft:#1d3327; --bad:#ff7b72; --bad-soft:#3d2320;
+    --warn:#ffd36a; --warn-soft:#3a3014;
+    --dict:#7fa6ff; --dict-soft:#1f2a45; --list:#ffb15e; --list-soft:#3f2c15; --leaf:#5fd38a;
+    --hl:#5a4a12; --hl-ink:#ffe9a8;
+    --code-bg:#1a1414; --code-ink:#f3ecec; --str:#8ad7a3; --num:#8fb3ff; --kw:#ff8a8f; --cm:#8f8080;
+    --node:#2b2222; --node-ink:#f3ecec; --node-stroke:#e2535a; --edge:#cbbdbd; --wbg:#2b2222;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+code,pre,.mono{font-family:ui-monospace,"Cascadia Code","JetBrains Mono",Consolas,Menlo,monospace}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 16px 48px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:8px 0 18px}
+header h1{font-size:clamp(22px,3vw,30px);margin:0;letter-spacing:-.01em}
+header .sub{color:var(--muted);font-size:14px;margin:2px 0 0}
+.spacer{flex:1}
+.tabs{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:999px;box-shadow:var(--shadow)}
+.tabs button{border:0;background:transparent;color:var(--muted);padding:8px 16px;border-radius:999px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;width:38px;height:38px;cursor:pointer;font-size:17px}
+.panel{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.hidden{display:none !important}
+h2{font-size:22px;margin:0 0 6px}
+h3{font-size:17px;margin:0 0 8px}
+p{margin:6px 0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--panel)}
+.card h3{display:flex;align-items:center;gap:8px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
+.tag.dict{background:var(--dict-soft);color:var(--dict)}
+.tag.list{background:var(--list-soft);color:var(--list)}
+.tag.round{background:var(--accent-soft);color:var(--accent)}
+pre.code{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:12px 14px;margin:8px 0;overflow:auto;font-size:14.5px;line-height:1.5;white-space:pre}
+pre.code .str{color:var(--str)} pre.code .num{color:var(--num)} pre.code .kw{color:var(--kw);font-weight:600} pre.code .cm{color:var(--cm);font-style:italic}
+pre.code .hlrow{background:var(--hl);color:var(--hl-ink);border-radius:4px}
+svg.pic{width:100%;height:auto;display:block;max-height:340px}
+svg.pic .edge{stroke:var(--edge);stroke-width:2.2;fill:none}
+svg.pic .node{fill:var(--node);stroke:var(--node-stroke);stroke-width:2.2}
+svg.pic .node.root{fill:var(--accent);stroke:var(--accent)}
+svg.pic .node.dim{stroke:var(--line);stroke-dasharray:4 3}
+svg.pic .node.dictn{stroke:var(--dict)} svg.pic .node.listn{stroke:var(--list)} svg.pic .node.leafn{stroke:var(--leaf)}
+svg.pic .node.hot{fill:var(--hl);stroke:var(--accent)}
+svg.pic .nt{fill:var(--node-ink);font:600 13px system-ui,sans-serif;text-anchor:middle}
+svg.pic .nt.onroot{fill:var(--accent-ink)}
+svg.pic .nt.hot{fill:var(--hl-ink)}
+svg.pic .nt.mono{font:600 12.5px ui-monospace,Consolas,monospace}
+svg.pic .wbg{fill:var(--wbg);stroke:var(--line)}
+svg.pic .wt{fill:var(--ink);font:700 12px ui-monospace,Consolas,monospace;text-anchor:middle}
+svg.pic .lab{fill:var(--muted);font:600 12.5px system-ui,sans-serif}
+svg.pic .lab.accent{fill:var(--accent)}
+svg.pic .lab.mid{text-anchor:middle}
+svg.pic .brace{stroke:var(--muted);stroke-width:1.5;fill:none;stroke-dasharray:5 4}
+/* tree view (indented) */
+.tree{background:var(--code-bg);border-radius:12px;padding:12px 14px;overflow:auto;font-size:14px;line-height:1.5}
+.trow{white-space:pre;display:flex;gap:0;align-items:baseline;border-radius:6px;padding:0 6px;margin:0 -6px}
+.trow .pre{color:var(--cm)}
+.trow .key{color:var(--str)} .trow .idx{color:var(--num)} .trow .arrow{color:var(--muted);padding:0 6px}
+.trow .val.str{color:var(--str)} .trow .val.num{color:var(--num)} .trow .val.kw{color:var(--kw)}
+.trow .badge{font-size:11px;font-weight:700;letter-spacing:.04em;margin-left:10px;padding:0 7px;border-radius:999px;align-self:center}
+.trow .badge.dict{background:var(--dict-soft);color:var(--dict)} .trow .badge.list{background:var(--list-soft);color:var(--list)}
+.trow .badge.rootb{background:var(--accent-soft);color:var(--accent)}
+.trow.target{background:var(--hl);color:var(--hl-ink)}
+.trow.target .val,.trow.target .key,.trow.target .idx{color:var(--hl-ink);font-weight:700}
+.trow.target::after{content:"◀ reach this";margin-left:12px;font:700 12px system-ui,sans-serif;color:var(--hl-ink)}
+/* game */
+.topbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.score{font-weight:700;font-size:15px}
+.score b{color:var(--accent);font-size:20px}
+.streak{font-weight:700;color:var(--warn)}
+.progress{height:8px;background:var(--line);border-radius:999px;overflow:hidden;flex:1;min-width:140px}
+.progress > div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.prompt{font-size:19px;font-weight:600;margin:4px 0 12px}
+.qgrid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start}
+@media (max-width:760px){.qgrid{grid-template-columns:1fr}}
+.options{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit;font-size:16px;cursor:pointer;transition:transform .08s,border-color .15s}
+.opt:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px)}
+.opt:disabled{cursor:default;opacity:.95}
+.opt .k{flex:0 0 26px;height:26px;border-radius:8px;background:var(--code-bg);color:var(--muted);font-weight:700;display:grid;place-items:center;font-size:13px}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.opt code{font-size:15px}
+.numrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.numrow input{font:inherit;font-size:20px;width:120px;padding:8px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink)}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;padding:10px 18px;border-radius:12px;cursor:pointer}
+.btn.ghost{background:var(--panel);color:var(--ink);border:1.5px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.feedback{margin-top:14px;padding:12px 16px;border-radius:12px;border-left:5px solid var(--line);display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-soft);border-color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);border-color:var(--bad)}
+.feedback .verdict{font-weight:800;margin-bottom:4px}
+.feedback .ok .verdict{color:var(--ok)}
+.next{margin-top:14px;display:flex;gap:10px;justify-content:flex-end;align-items:center}
+/* path builder */
+.expr{background:var(--code-bg);border-radius:12px;padding:12px 14px;font-size:20px;min-height:52px;display:flex;flex-wrap:wrap;align-items:center;gap:2px}
+.expr .root{color:var(--ink);font-weight:700}
+.expr .tok{padding:1px 2px;border-radius:5px;background:var(--panel);border:1px solid var(--line)}
+.expr .cursor{display:inline-block;width:2px;height:24px;background:var(--accent);margin-left:4px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.tokens{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.chip{border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:7px 12px;font-family:ui-monospace,Consolas,monospace;font-size:16px;cursor:pointer}
+.chip.key{color:var(--str)} .chip.idx{color:var(--num)}
+.chip:hover:not(:disabled){border-color:var(--accent)}
+.chip:disabled{opacity:.5;cursor:default}
+.console{background:#1a1414;color:#f3ecec;border-radius:12px;padding:12px 14px;font-family:ui-monospace,Consolas,monospace;font-size:15px;white-space:pre-wrap;min-height:48px}
+.console .p{color:#8fb3ff}.console .err{color:#ff7b72}.console .out{color:#8ad7a3}
+/* start / end */
+.rounds{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:16px 0}
+.rcard{border:1.5px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);text-align:left;font:inherit;color:var(--ink)}
+.rcard .n{font-size:26px}
+.rcard h3{margin:4px 0 2px;font-size:16px}
+.rcard p{margin:0;font-size:13.5px;color:var(--muted)}
+.lenpick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.stars{font-size:40px;letter-spacing:4px}
+table.res{width:100%;border-collapse:collapse;margin-top:10px}
+table.res td,table.res th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+table.res td.r{text-align:right;font-weight:700}
+.bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;width:100%}
+.bar>div{height:100%;background:var(--ok)}
+.bar.low>div{background:var(--bad)}
+.levels .lvl1{color:var(--accent)} .levels .lvl2{color:var(--dict)} .levels .lvl3{color:var(--list)} .levels .lvl4{color:var(--leaf)}
+kbd{font:600 12px ui-monospace,Consolas,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;color:var(--muted)}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>2.3 Check yourself · Advanced Data Structures</h1>
+    <p class="sub">M-227-04 Programming for Data Analytics · warm-up before 3.1 Functions</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="recap">Recap in pictures</button>
+    <button role="tab" aria-selected="false" data-tab="game">Play the game</button>
+  </div>
+  <button class="iconbtn" id="themeBtn" title="Light / dark theme" aria-label="Light / dark theme">🌗</button>
+</header>
+
+<!-- ============ RECAP ============ -->
+<section id="tab-recap">
+  <div class="panel">
+    <h2>Four ideas from last time</h2>
+    <p class="muted">Everything here is built from lists, tuples, sets and dictionaries <b>nested</b> inside each other.</p>
+    <div class="grid g2" style="margin-top:14px">
+      <div class="card">
+        <h3>1 · A nested record is a tree <span class="tag dict">dict</span><span class="tag list">list</span></h3>
+        <div id="pic-record"></div>
+        <pre class="code" id="code-record"></pre>
+        <p class="small"><span style="color:var(--dict);font-weight:700">blue</span> = dictionary (needs a key), <span style="color:var(--list);font-weight:700">orange</span> = list (needs a position), <span style="color:var(--leaf);font-weight:700">green</span> = a plain value — the end of the path.</p>
+        <p class="small">To reach <code>"office"</code>: <code>product</code> → key <code>"tags"</code> → position <code>1</code> → <code>product["tags"][1]</code>. Read chained brackets <b>left to right</b>, one level per bracket.</p>
+      </div>
+      <div class="card">
+        <h3>2 · The four common combinations</h3>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">
+          <div><span class="tag list">list</span> of <span class="tag list">lists</span><pre class="code" style="font-size:13px">[[1, 2, 3],
+ [4, 5, 6]]</pre><p class="small muted">a table / matrix</p></div>
+          <div><span class="tag list">list</span> of <span class="tag dict">dicts</span><pre class="code" style="font-size:13px">[{"name": "Anna", "grade": 9},
+ {"name": "Janis", "grade": 7}]</pre><p class="small muted">records = rows</p></div>
+          <div><span class="tag dict">dict</span> of <span class="tag list">lists</span><pre class="code" style="font-size:13px">{"Riga": [12, 14, 9],
+ "Cesis": [10, 11, 8]}</pre><p class="small muted">key → a series</p></div>
+          <div><span class="tag dict">dict</span> of <span class="tag dict">dicts</span><pre class="code" style="font-size:13px">{"Riga": {"pop": 605000, "area": 307},
+ "Cesis": {"pop": 14000, "area": 19}}</pre><p class="small muted">record per key; graphs</p></div>
+        </div>
+        <p class="small"><b>Rule:</b> a list is indexed by <span style="color:var(--num);font-weight:700">position</span> <code>[0]</code>, a dictionary by <span style="color:var(--str);font-weight:700">key</span> <code>["Riga"]</code>. Mixing them up gives <code>TypeError</code> / <code>KeyError</code>.</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:26px">Graphs — four types, one Python trick</h2>
+    <p class="muted">A graph = vertices + edges. The <em>type</em> only changes <b>how we store the edges</b>.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(380px,1fr));margin-top:12px">
+      <div class="card"><h3>Undirected</h3><div id="pic-undirected"></div><pre class="code" style="font-size:13px">friends = {"Anna": {"Janis", "Marta"},
+           "Janis": {"Anna", "Marta"},
+           "Marta": {"Anna", "Janis", "Olegs"},
+           "Olegs": {"Marta"}}</pre><p class="small muted">edge stored in <b>both</b> directions</p></div>
+      <div class="card"><h3>Directed</h3><div id="pic-directed"></div><pre class="code" style="font-size:13px">follows = {"Anna": {"Janis", "Marta"},
+           "Janis": {"Marta"},
+           "Marta": {"Anna"},
+           "Olegs": {"Anna", "Marta"}}</pre><p class="small muted">edge stored in <b>one</b> direction</p></div>
+      <div class="card"><h3>Weighted</h3><div id="pic-weighted"></div><pre class="code" style="font-size:13px">distance = {"Riga": {"Jelgava": 42, "Jurmala": 25, "Ogre": 36},
+            "Jelgava": {"Riga": 42},
+            "Jurmala": {"Riga": 25},
+            "Ogre": {"Riga": 36}}</pre><p class="small muted">dict of dicts: neighbour → number</p></div>
+      <div class="card"><h3>Disconnected</h3><div id="pic-disconnected"></div><pre class="code" style="font-size:13px">groups = {"Anna": {"Janis", "Marta"}, "Janis": {"Anna", "Marta"},
+          "Marta": {"Anna", "Janis"},
+          "Olegs": {"Ilze"}, "Ilze": {"Olegs"}}</pre><p class="small muted">two parts, no edge between them</p></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Questions we answer with loops</h3>
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+        <div><p class="small"><b>neighbours &amp; degree</b></p><pre class="code" style="font-size:13px">list(travel["Riga"])
+len(travel["Riga"])</pre></div>
+        <div><p class="small"><b>direct connection?</b></p><pre class="code" style="font-size:13px">"Helsinki" in travel["Riga"]</pre></div>
+        <div><p class="small"><b>nearest neighbour</b> — the <code>(value, name)</code> tuple trick</p><pre class="code" style="font-size:13px">pairs = []
+for city, h in travel["Riga"].items():
+    pairs.append((h, city))
+print(min(pairs))   # (1.0, 'Tallinn')</pre></div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:26px">Trees and forests</h2>
+    <div class="grid g2" style="margin-top:12px">
+      <div class="card">
+        <h3>Tree = a hierarchy</h3>
+        <div id="pic-tree"></div>
+        <p class="small">One <b>root</b>; every other vertex has exactly one <b>parent</b>; vertices without children are <b>leaves</b>. No cycles → exactly one path between any two vertices. <b><i>n</i> vertices → <i>n</i> − 1 edges.</b></p>
+        <p class="small">In Python: a dictionary whose values are dictionaries, down to the leaves. <b>One <code>for</code> per level.</b></p>
+      </div>
+      <div class="card">
+        <h3>Forest = a list of trees</h3>
+        <div id="pic-forest"></div>
+        <p class="small">Several trees, not connected to each other. <b>Random forest</b> (week 8): many slightly different decision trees vote; the <b>majority</b> wins. One tree can be wrong — a hundred trees rarely agree on the same mistake.</p>
+      </div>
+    </div>
+    <div class="card levels" style="margin-top:14px">
+      <h3>Walking a tree: depth of nesting = number of <code>for</code> loops</h3>
+      <div class="grid g2">
+        <div id="tree-catalogue"></div>
+        <pre class="code" id="code-walk"></pre>
+      </div>
+    </div>
+    <div class="next" style="justify-content:center;margin-top:22px">
+      <button class="btn" id="toGame">Ready? Play the game →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="tab-game" class="hidden">
+  <div class="panel" id="startScreen">
+    <h2>Structure Quest</h2>
+    <p class="muted">Five rounds · 15 questions · 10 points each. Pictures, bracket paths and a bit of Python. Answer with the mouse or the keys <kbd>1</kbd>–<kbd>6</kbd>, continue with <kbd>Enter</kbd>.</p>
+    <div class="rounds" id="roundCards"></div>
+    <div class="next" style="justify-content:space-between">
+      <span class="small muted">Your total score appears after the fifth round.</span>
+      <button class="btn" id="playAll">Start →</button>
+    </div>
+  </div>
+
+  <div class="panel hidden" id="qScreen">
+    <div class="topbar">
+      <span class="tag round" id="roundTag">Round 1</span>
+      <span class="small muted" id="qCount">1 / 15</span>
+      <div class="progress"><div id="progBar"></div></div>
+      <span class="streak" id="streak"></span>
+      <span class="score">Score <b id="score">0</b></span>
+    </div>
+    <div class="prompt" id="prompt"></div>
+    <div id="qBody"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="next" id="nextRow"></div>
+  </div>
+
+  <div class="panel hidden" id="endScreen"></div>
+</section>
+
+<footer>M-227-04 Programming for Data Analytics · TSI · 2.3 Advanced Data Structures · check yourself</footer>
+</div>
+
+<script>
+/* ---------------- helpers ---------------- */
+const F = x => { const n = new Number(x); n.isFloat = true; return n; };     // a Python float (keeps "1.0")
+const isC = x => x !== null && typeof x === 'object' && !(x instanceof Number);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pick = (a, n) => shuffle(a).slice(0, n);
+
+function py(v, q = '"') {
+  if (v === null || v === undefined) return 'None';
+  if (v === true) return 'True'; if (v === false) return 'False';
+  if (v instanceof Number) { const s = String(v.valueOf()); return /[.e]/.test(s) ? s : s + '.0'; }
+  if (typeof v === 'number') return String(v);
+  if (typeof v === 'string') return q + v + q;
+  if (Array.isArray(v)) return '[' + v.map(x => py(x, q)).join(', ') + ']';
+  return '{' + Object.entries(v).map(([k, x]) => q + k + q + ': ' + py(x, q)).join(', ') + '}';
+}
+function pyPretty(v, ind = 0, q = '"', width = 64) {
+  const flat = py(v, q);
+  if (!isC(v) || flat.length + ind <= width) return flat;
+  const pad = ' '.repeat(ind + 4);
+  if (Array.isArray(v)) return '[\n' + v.map(x => pad + pyPretty(x, ind + 4, q, width)).join(',\n') + '\n' + ' '.repeat(ind) + ']';
+  return '{\n' + Object.entries(v).map(([k, x]) => pad + q + k + q + ': ' + pyPretty(x, ind + 4 + k.length + 4, q, width)).join(',\n') + '\n' + ' '.repeat(ind) + '}';
+}
+const KW = /\b(for|in|if|elif|else|while|print|len|sorted|min|max|sum|import|def|return|type|list|dict|set|del|not|and|or|is|round)\b/g;
+function hl(code) {
+  return esc(code)
+    .replace(/(#.*)$/gm, '\u0001$1\u0002')
+    .replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, '<span class="str">$1</span>')
+    .replace(/\b(True|False|None)\b/g, '<span class="kw">$1</span>')
+    .replace(/(?<![\w"'])(-?\d+(?:\.\d+)?)(?![\w"'])/g, '<span class="num">$1</span>')
+    .replace(KW, '<span class="kw">$1</span>')
+    .replace(/\u0001(.*?)\u0002/g, '<span class="cm">$1</span>');
+}
+const codeBlock = (code, extra = '') => `<pre class="code ${extra}">${hl(code)}</pre>`;
+const given = (name, v) => codeBlock(name + ' = ' + pyPretty(v, 0, '"', 56));
+
+/* indented tree view of a nested object (like the lesson picture) */
+function treeView(name, v, targetPath) {
+  const tKey = targetPath ? JSON.stringify(targetPath) : null;
+  let rows = [];
+  const valHtml = x => {
+    if (isC(x)) return Array.isArray(x) ? `<span class="val">[ … ]</span><span class="badge list">list · ${x.length}</span>` : `<span class="val">{ … }</span><span class="badge dict">dict · ${Object.keys(x).length}</span>`;
+    const cls = typeof x === 'string' ? 'str' : (x === true || x === false || x == null) ? 'kw' : 'num';
+    return `<span class="val ${cls}">${esc(py(x, '"'))}</span>`;
+  };
+  const walk = (node, prefix, path) => {
+    const ents = Array.isArray(node) ? node.map((x, i) => [i, x, 'idx']) : Object.entries(node).map(([k, x]) => [k, x, 'key']);
+    ents.forEach(([k, x, kind], i) => {
+      const last = i === ents.length - 1;
+      const p = path.concat([[kind, k]]);
+      const isT = tKey && JSON.stringify(p) === tKey;
+      const label = kind === 'idx' ? `<span class="idx">[${k}]</span>` : `<span class="key">"${esc(k)}"</span>`;
+      rows.push(`<div class="trow${isT ? ' target' : ''}"><span class="pre">${prefix}${last ? '└── ' : '├── '}</span>${label}<span class="arrow">→</span>${valHtml(x)}</div>`);
+      if (isC(x)) walk(x, prefix + (last ? '    ' : '│   '), p);
+    });
+  };
+  const rootBadge = Array.isArray(v) ? `<span class="badge list">list · ${v.length}</span>` : `<span class="badge dict">dict · ${Object.keys(v).length}</span>`;
+  rows.push(`<div class="trow"><b>${esc(name)}</b>${rootBadge}<span class="badge rootb">root</span></div>`);
+  walk(v, '', []);
+  return `<div class="tree mono">${rows.join('')}</div>`;
+}
+
+/* Python-style evaluation of root[tok][tok]... */
+function pyType(x) {
+  if (x === null || x === undefined) return 'NoneType'; if (x === true || x === false) return 'bool';
+  if (x instanceof Number) return 'float'; if (typeof x === 'number') return 'int';
+  if (typeof x === 'string') return 'str'; if (Array.isArray(x)) return 'list'; return 'dict';
+}
+function evalPath(root, tokens) {
+  let cur = root, path = [];
+  for (const t of tokens) {
+    const ty = pyType(cur);
+    if (ty === 'list') {
+      if (t.kind !== 'idx') return { error: `TypeError: list indices must be integers or slices, not str` };
+      let i = t.value < 0 ? cur.length + t.value : t.value;
+      if (i < 0 || i >= cur.length) return { error: 'IndexError: list index out of range' };
+      cur = cur[i]; path.push(['idx', i]);
+    } else if (ty === 'dict') {
+      if (t.kind !== 'key' || !Object.prototype.hasOwnProperty.call(cur, t.value)) return { error: `KeyError: ${t.kind === 'key' ? "'" + t.value + "'" : t.value}` };
+      cur = cur[t.value]; path.push(['key', t.value]);
+    } else if (ty === 'str') {
+      if (t.kind !== 'idx') return { error: 'TypeError: string indices must be integers' };
+      let i = t.value < 0 ? cur.length + t.value : t.value;
+      if (i < 0 || i >= cur.length) return { error: 'IndexError: string index out of range' };
+      cur = cur[i]; path.push(['idx', i]);
+    } else return { error: `TypeError: '${ty}' object is not subscriptable` };
+  }
+  return { value: cur, path };
+}
+function tokensOf(v) {
+  const keys = [], idxs = new Set();
+  const walk = x => { if (Array.isArray(x)) { x.forEach((y, i) => { idxs.add(i); walk(y); }); } else if (isC(x)) { Object.entries(x).forEach(([k, y]) => { if (!keys.includes(k)) keys.push(k); walk(y); }); } };
+  walk(v);
+  const toks = keys.map(k => ({ kind: 'key', value: k }));
+  [...idxs].sort((a, b) => a - b).forEach(i => toks.push({ kind: 'idx', value: i }));
+  toks.push({ kind: 'idx', value: -1 });
+  return toks;
+}
+const tokStr = t => t.kind === 'key' ? `["${t.value}"]` : `[${t.value}]`;
+
+/* ---------------- SVG pictures ---------------- */
+let markerSeq = 0;
+function svgGraph({ w = 320, h = 200, nodes, edges, directed = false, labels = [], braces = [] }) {
+  const id = 'arr' + (markerSeq++);
+  const pos = {}; nodes.forEach(n => { n.hw = Math.max(22, (n.label || n.id).length * 4.3 + 12); n.hh = 17; pos[n.id] = n; });
+  let s = `<svg viewBox="0 0 ${w} ${h}" class="pic" role="img">`;
+  s += `<defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--edge)"/></marker></defs>`;
+  const has = (a, b) => edges.some(e => e.a === a && e.b === b);
+  for (const e of edges) {
+    const a = pos[e.a], b = pos[e.b];
+    const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy), ux = dx / d, uy = dy / d;
+    const exit = n => Math.min(n.hw / Math.abs(ux || 1e-9), n.hh / Math.abs(uy || 1e-9));
+    let x1 = a.x + ux * (exit(a) + 1), y1 = a.y + uy * (exit(a) + 1), x2 = b.x - ux * (exit(b) + (directed ? 4 : 1)), y2 = b.y - uy * (exit(b) + (directed ? 4 : 1));
+    if (directed && has(e.b, e.a)) { const ox = -uy * 6, oy = ux * 6; x1 += ox; y1 += oy; x2 += ox; y2 += oy; }
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="edge" ${directed ? `marker-end="url(#${id})"` : ''}/>`;
+    if (e.w != null) { const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, ww = String(e.w).length * 7.5 + 12; s += `<rect x="${mx - ww / 2}" y="${my - 10}" width="${ww}" height="20" rx="6" class="wbg"/><text x="${mx}" y="${my + 4}" class="wt">${e.w}</text>`; }
+  }
+  for (const br of braces) s += `<rect x="${br.x}" y="${br.y}" width="${br.w}" height="${br.h}" rx="14" class="brace"/>`;
+  for (const n of nodes) {
+    const cls = n.cls || '';
+    s += `<rect x="${n.x - n.hw}" y="${n.y - n.hh}" width="${n.hw * 2}" height="${n.hh * 2}" rx="17" class="node ${cls}"/>`;
+    s += `<text x="${n.x}" y="${n.y + 4.5}" class="nt ${cls.includes('root') ? 'onroot' : ''} ${cls.includes('hot') ? 'hot' : ''} ${n.mono ? 'mono' : ''}">${esc(n.label || n.id)}</text>`;
+  }
+  for (const l of labels) s += `<text x="${l.x}" y="${l.y}" class="lab ${l.cls || ''}">${esc(l.text)}</text>`;
+  return s + '</svg>';
+}
+
+const PIC = {
+  undirected: () => svgGraph({ w: 320, h: 190, nodes: [{ id: 'Anna', x: 80, y: 50 }, { id: 'Janis', x: 230, y: 50 }, { id: 'Marta', x: 155, y: 140 }, { id: 'Olegs', x: 270, y: 150 }],
+    edges: [{ a: 'Anna', b: 'Janis' }, { a: 'Anna', b: 'Marta' }, { a: 'Janis', b: 'Marta' }, { a: 'Marta', b: 'Olegs' }] }),
+  directed: () => svgGraph({ w: 320, h: 190, directed: true, nodes: [{ id: 'Anna', x: 80, y: 50 }, { id: 'Janis', x: 230, y: 50 }, { id: 'Marta', x: 155, y: 140 }, { id: 'Olegs', x: 270, y: 150 }],
+    edges: [{ a: 'Anna', b: 'Janis' }, { a: 'Anna', b: 'Marta' }, { a: 'Janis', b: 'Marta' }, { a: 'Marta', b: 'Anna' }, { a: 'Olegs', b: 'Anna' }, { a: 'Olegs', b: 'Marta' }] }),
+  weighted: () => svgGraph({ w: 320, h: 190, nodes: [{ id: 'Riga', x: 160, y: 60 }, { id: 'Jelgava', x: 60, y: 150 }, { id: 'Jurmala', x: 60, y: 40 }, { id: 'Ogre', x: 265, y: 140 }],
+    edges: [{ a: 'Riga', b: 'Jelgava', w: 42 }, { a: 'Riga', b: 'Jurmala', w: 25 }, { a: 'Riga', b: 'Ogre', w: 36 }] }),
+  disconnected: () => svgGraph({ w: 320, h: 190, nodes: [{ id: 'Anna', x: 70, y: 50 }, { id: 'Janis', x: 170, y: 50 }, { id: 'Marta', x: 120, y: 140 }, { id: 'Olegs', x: 260, y: 60 }, { id: 'Ilze', x: 260, y: 150 }],
+    edges: [{ a: 'Anna', b: 'Janis' }, { a: 'Anna', b: 'Marta' }, { a: 'Janis', b: 'Marta' }, { a: 'Olegs', b: 'Ilze' }], braces: [{ x: 15, y: 15, w: 190, h: 160 }, { x: 215, y: 15, w: 90, h: 160 }] }),
+  tree: (labels = true) => svgGraph({ w: 430, h: 210, nodes: [{ id: 'Company', x: 180, y: 35, cls: 'root' }, { id: 'Sales', x: 70, y: 105 }, { id: 'IT', x: 180, y: 105 }, { id: 'HR', x: 290, y: 105 }, { id: 'Anna', x: 30, y: 180 }, { id: 'Janis', x: 110, y: 180 }, { id: 'Marta', x: 180, y: 180 }, { id: 'Ilze', x: 290, y: 180 }],
+    edges: [{ a: 'Company', b: 'Sales' }, { a: 'Company', b: 'IT' }, { a: 'Company', b: 'HR' }, { a: 'Sales', b: 'Anna' }, { a: 'Sales', b: 'Janis' }, { a: 'IT', b: 'Marta' }, { a: 'HR', b: 'Ilze' }],
+    labels: labels ? [{ x: 240, y: 40, text: '← root', cls: 'accent' }, { x: 322, y: 110, text: '← parent of Ilze' }, { x: 322, y: 185, text: '← leaves' }] : [] }),
+  forest: () => svgGraph({ w: 360, h: 190, nodes: [{ id: 'A', x: 60, y: 40, cls: 'root' }, { id: 'B', x: 30, y: 110 }, { id: 'C', x: 95, y: 110 }, { id: 'D', x: 95, y: 170 }, { id: 'E', x: 180, y: 40, cls: 'root' }, { id: 'F', x: 180, y: 110 }, { id: 'G', x: 300, y: 40, cls: 'root' }, { id: 'H', x: 255, y: 110 }, { id: 'I', x: 300, y: 110 }, { id: 'J', x: 345, y: 110 }],
+    edges: [{ a: 'A', b: 'B' }, { a: 'A', b: 'C' }, { a: 'C', b: 'D' }, { a: 'E', b: 'F' }, { a: 'G', b: 'H' }, { a: 'G', b: 'I' }, { a: 'G', b: 'J' }],
+    labels: [{ x: 15, y: 15, text: 'tree 1' }, { x: 150, y: 15, text: 'tree 2' }, { x: 260, y: 15, text: 'tree 3' }] }),
+  cycle: () => svgGraph({ w: 300, h: 190, nodes: [{ id: 'A', x: 90, y: 45 }, { id: 'B', x: 210, y: 45 }, { id: 'C', x: 210, y: 150 }, { id: 'D', x: 90, y: 150 }],
+    edges: [{ a: 'A', b: 'B' }, { a: 'B', b: 'C' }, { a: 'C', b: 'D' }, { a: 'D', b: 'A' }] }),
+  baltic: () => svgGraph({ w: 420, h: 300, nodes: [{ id: 'Helsinki', x: 330, y: 40 }, { id: 'Stockholm', x: 90, y: 60 }, { id: 'Tallinn', x: 330, y: 130 }, { id: 'Riga', x: 230, y: 200 }, { id: 'Vilnius', x: 290, y: 270 }, { id: 'Warsaw', x: 110, y: 260 }],
+    edges: [{ a: 'Riga', b: 'Tallinn', w: '1.0' }, { a: 'Riga', b: 'Vilnius', w: '1.0' }, { a: 'Riga', b: 'Stockholm', w: '1.5' }, { a: 'Tallinn', b: 'Helsinki', w: '2.0' }, { a: 'Tallinn', b: 'Stockholm', w: '15.0' }, { a: 'Helsinki', b: 'Stockholm', w: '16.0' }, { a: 'Vilnius', b: 'Warsaw', w: '1.0' }],
+    labels: [{ x: 12, y: 290, text: 'hours of travel' }] }),
+  office: () => svgGraph({ w: 420, h: 230, nodes: [{ id: 'Reception', x: 90, y: 60 }, { id: 'Office A', x: 230, y: 50 }, { id: 'Office B', x: 300, y: 130 }, { id: 'Kitchen', x: 90, y: 180 }, { id: 'Lab', x: 230, y: 200 }, { id: 'Server room', x: 350, y: 205 }],
+    edges: [{ a: 'Reception', b: 'Office A', w: 15 }, { a: 'Reception', b: 'Office B', w: 25 }, { a: 'Reception', b: 'Kitchen', w: 40 }, { a: 'Office A', b: 'Office B', w: 10 }, { a: 'Office B', b: 'Lab', w: 30 }, { a: 'Lab', b: 'Server room', w: 12 }, { a: 'Kitchen', b: 'Office A', w: 35 }],
+    labels: [{ x: 12, y: 222, text: 'seconds of walking' }] }),
+  record: (hot) => svgGraph({ w: 570, h: 260, nodes: [
+      { id: 'product', x: 285, y: 30, cls: 'root' },
+      { id: 'k1', label: '"name"', x: 48, y: 100, cls: 'dictn', mono: true }, { id: 'k2', label: '"price"', x: 132, y: 100, cls: 'dictn', mono: true }, { id: 'k3', label: '"tags"', x: 285, y: 100, cls: 'listn', mono: true }, { id: 'k4', label: '"stock"', x: 460, y: 100, cls: 'dictn', mono: true },
+      { id: 'v1', label: '"Laptop"', x: 48, y: 230, cls: 'leafn', mono: true }, { id: 'v2', label: '900', x: 132, y: 230, cls: 'leafn', mono: true },
+      { id: 'i0', label: '[0]', x: 235, y: 165, cls: 'listn', mono: true }, { id: 'i1', label: '[1]', x: 340, y: 165, cls: 'listn' + (hot ? ' hot' : ''), mono: true },
+      { id: 'e0', label: '"electronics"', x: 235, y: 230, cls: 'leafn', mono: true }, { id: 'e1', label: '"office"', x: 340, y: 230, cls: 'leafn' + (hot ? ' hot' : ''), mono: true },
+      { id: 'r', label: '"Riga"', x: 420, y: 165, cls: 'dictn', mono: true }, { id: 'l', label: '"Liepaja"', x: 505, y: 165, cls: 'dictn', mono: true },
+      { id: 'r5', label: '5', x: 420, y: 230, cls: 'leafn', mono: true }, { id: 'l0', label: '0', x: 505, y: 230, cls: 'leafn', mono: true }],
+    edges: [{ a: 'product', b: 'k1' }, { a: 'product', b: 'k2' }, { a: 'product', b: 'k3' }, { a: 'product', b: 'k4' }, { a: 'k1', b: 'v1' }, { a: 'k2', b: 'v2' }, { a: 'k3', b: 'i0' }, { a: 'k3', b: 'i1' }, { a: 'i0', b: 'e0' }, { a: 'i1', b: 'e1' }, { a: 'k4', b: 'r' }, { a: 'k4', b: 'l' }, { a: 'r', b: 'r5' }, { a: 'l', b: 'l0' }],
+    labels: [{ x: 340, y: 35, text: 'root · dict', cls: 'accent' }] }),
+};
+
+/* ---------------- data from the lesson ---------------- */
+const D = {
+  product: { name: 'Laptop', price: 900, tags: ['electronics', 'office'], stock: { Riga: 5, Liepaja: 0 } },
+  students: [{ name: 'Anna', grades: [9, 8, 10] }, { name: 'Janis', grades: [7, 6, 8] }, { name: 'Marta', grades: [10, 10, 9] }],
+  cities: { Riga: { population: 605000, area: 307 }, Daugavpils: { population: 79000, area: 72 }, Liepaja: { population: 67000, area: 60 } },
+  catalogue: { Electronics: { Laptops: [{ name: 'ProBook 15', price: 899 }, { name: 'Air 13', price: 1199 }], Phones: [{ name: 'Galaxy S', price: 749 }, { name: 'Pixel', price: 649 }, { name: 'Nokia', price: 149 }] }, Furniture: { Chairs: [{ name: 'Office chair', price: 120 }], Desks: [{ name: 'Standing desk', price: 390 }, { name: 'Corner desk', price: 210 }] } },
+  travel: { Riga: { Tallinn: F(1), Vilnius: F(1), Stockholm: F(1.5) }, Tallinn: { Riga: F(1), Helsinki: F(2), Stockholm: F(15) }, Vilnius: { Riga: F(1), Warsaw: F(1) }, Stockholm: { Riga: F(1.5), Tallinn: F(15), Helsinki: F(16) }, Helsinki: { Tallinn: F(2), Stockholm: F(16) }, Warsaw: { Vilnius: F(1) } },
+  order: { customer: 'Marta', items: [{ name: 'sandwich', price: F(5.2) }, { name: 'coffee', price: F(2.8) }, { name: 'cookie', price: F(1.2) }], paid: false },
+  follows: { anna: ['janis', 'marta'], janis: ['marta'], marta: ['anna'], olegs: ['anna', 'marta'] },
+};
+
+/* ---------------- question pools ----------------
+   Only questions marked core: 1..3 are played (3 per round, in that order).
+   The others are spare — give one a core number to swap it in. */
+const NAME_OPTS = ['Undirected graph', 'Directed graph', 'Weighted graph', 'Disconnected graph', 'Tree', 'Forest'];
+const Q = {
+  name: [
+    { pic: PIC.undirected, answer: 'Undirected graph', explain: 'No arrows, no numbers: an edge just means "friends", and friendship works both ways. In Python: a dictionary of sets with every edge stored in <b>both</b> directions.' },
+    { core: 1, pic: PIC.directed, answer: 'Directed graph', explain: 'Arrows! Anna → Janis does not mean Janis → Anna. The edge is stored in <b>one</b> direction only — "follows" on Instagram, one-way streets, web links.' },
+    { pic: PIC.weighted, answer: 'Weighted graph', explain: 'Every edge carries a number (km). In Python: a dictionary of dictionaries — <code>distance["Riga"]["Jelgava"]</code> → <code>42</code>.' },
+    { core: 2, pic: PIC.disconnected, answer: 'Disconnected graph', explain: 'Two parts with no edge between them: Anna cannot reach Olegs at all. It is <b>not</b> a forest — Anna–Janis–Marta form a cycle.' },
+    { pic: () => PIC.tree(false), answer: 'Tree', explain: 'One root, every other vertex has exactly one parent, no cycles. 8 vertices → 7 edges. A hierarchy (company → department → employee) <b>is</b> a tree.' },
+    { core: 3, pic: PIC.forest, answer: 'Forest', explain: 'Several separate trees. Yes, it is also disconnected — but the precise name is <b>forest</b>: no part has a cycle. In Python simply a <b>list of trees</b>.' },
+    { pic: PIC.cycle, answer: 'Undirected graph', explain: 'Not a tree: A–B–C–D–A is a <b>cycle</b>, so A and C are joined by two different paths. No arrows, no weights → a plain undirected graph.' },
+    { pic: PIC.baltic, answer: 'Weighted graph', explain: 'Numbers on the edges (hours) make it weighted. It is also connected — every city can be reached from every other one.' },
+  ],
+  path: [
+    { core: 1, name: 'product', data: D.product, target: [['key', 'tags'], ['idx', 1]], explain: '<code>product["tags"]</code> is a <b>list</b>, so the next bracket needs a position: <code>[1]</code>.' },
+    { name: 'product', data: D.product, target: [['key', 'stock'], ['key', 'Liepaja']], explain: '<code>product["stock"]</code> is a <b>dictionary</b>, so the next bracket needs a key: <code>["Liepaja"]</code>.' },
+    { name: 'students', data: D.students, target: [['idx', 1], ['key', 'name']], explain: '<code>students</code> is a list of records: first the position of the record <code>[1]</code>, then the field <code>["name"]</code>.' },
+    { core: 2, name: 'students', data: D.students, target: [['idx', 2], ['key', 'grades'], ['idx', 0]], explain: 'Three levels, three brackets: record <code>[2]</code> → field <code>["grades"]</code> → position <code>[0]</code>.' },
+    { name: 'students', data: D.students, target: [['idx', 0], ['key', 'grades'], ['idx', 2]], explain: 'The last grade of the first student: <code>[0]["grades"][2]</code> — or <code>[-1]</code> for the last position.' },
+    { core: 3, name: 'catalogue', data: D.catalogue, target: [['key', 'Electronics'], ['key', 'Phones'], ['idx', 0], ['key', 'name']], explain: 'Four levels: category → subcategory → product (a list, so a position) → field. One bracket per level.' },
+    { name: 'catalogue', data: D.catalogue, target: [['key', 'Furniture'], ['key', 'Chairs'], ['idx', 0], ['key', 'price']], explain: 'dict → dict → list → dict: <code>["Furniture"]["Chairs"][0]["price"]</code>.' },
+    { name: 'travel', data: D.travel, target: [['key', 'Riga'], ['key', 'Stockholm']], explain: 'A weighted graph as a dictionary of dictionaries: <code>travel["Riga"]["Stockholm"]</code> is the weight of that edge.' },
+    { name: 'order', data: D.order, target: [['key', 'items'], ['idx', 1], ['key', 'price']], explain: '<code>order["items"]</code> is a list of dictionaries: <code>[1]</code> picks the coffee, <code>["price"]</code> its price.' },
+    { name: 'cities', data: D.cities, target: [['key', 'Riga'], ['key', 'area']], explain: 'A record for every key: <code>cities["Riga"]</code> is a dictionary, <code>["area"]</code> a value inside it.' },
+  ],
+  prints: [
+    { data: 'product', code: 'print(product["stock"]["Riga"])', options: ['5', '0', "{'Riga': 5, 'Liepaja': 0}", "KeyError: 'Riga'"], answer: 0, explain: '<code>product["stock"]</code> is the inner dictionary, <code>["Riga"]</code> looks up the value 5.' },
+    { data: 'students', code: 'print(students[0]["grades"][-1])', options: ['9', '10', '[9, 8, 10]', 'IndexError: list index out of range'], answer: 1, explain: '<code>[-1]</code> is the <b>last</b> element of the list <code>[9, 8, 10]</code>.' },
+    { data: 'students', code: 'print(len(students[1]["grades"]))', options: ['3', '2', '21', '1'], answer: 0, explain: '<code>students[1]["grades"]</code> is <code>[7, 6, 8]</code>; its length is 3.' },
+    { data: 'product', code: 'print(product["stock"]["Daugavpils"])', options: ['0', 'None', "KeyError: 'Daugavpils'", 'IndexError: list index out of range'], answer: 2, explain: 'A missing key in a dictionary raises <code>KeyError</code>. Use <code>.get("Daugavpils", 0)</code> for a safe default.' },
+    { core: 2, data: 'product', code: 'print(product["stock"].get("Daugavpils", 0))', options: ['0', 'None', "KeyError: 'Daugavpils'", '5'], answer: 0, explain: '<code>.get(key, default)</code> returns the default when the key is missing — no error.' },
+    { core: 1, data: 'product', code: 'print(product["tags"]["office"])', options: ["'office'", '1', "KeyError: 'office'", 'TypeError: list indices must be integers or slices, not str'], answer: 3, explain: '<code>product["tags"]</code> is a <b>list</b> — it is indexed by position, not by a string key.' },
+    { data: 'students', code: 'print(students[-1]["name"])', options: ["'Marta'", "'Anna'", "{'name': 'Marta', 'grades': [10, 10, 9]}", 'IndexError: list index out of range'], answer: 0, explain: '<code>students[-1]</code> is the last record, <code>["name"]</code> its name.' },
+    { core: 3, data: null, code: 'original = {"name": "Laptop", "stock": {"Riga": 5}}\nshallow = dict(original)\nshallow["stock"]["Riga"] = 0\nprint(original["stock"]["Riga"])', options: ['5', '0', "KeyError: 'Riga'", 'None'], answer: 1, explain: '<code>dict(original)</code> is a <b>shallow</b> copy: the outer dictionary is new, but the inner <code>"stock"</code> dictionary is <b>shared</b>. Use <code>copy.deepcopy()</code>.' },
+    { data: 'students', code: 'for student in students:\n    for grade in student["grades"]:\n        print(grade)', prompt: 'How many lines does this print?', options: ['3', '6', '9', '1'], answer: 2, explain: 'The outer loop runs 3 times (students), the inner loop 3 times for each → 3 × 3 = 9 lines.' },
+    { data: null, code: 'pairs = [(78, "Anna"), (92, "Janis"), (85, "Marta")]\nprint(sorted(pairs, reverse=True)[0][1])', options: ["'Janis'", '92', "'Anna'", "(92, 'Janis')"], answer: 0, explain: 'Tuples sort by their first element: <code>(92, "Janis")</code> comes first; <code>[1]</code> takes the name out of the tuple.' },
+    { data: null, code: 'a = {"street": "Lomonosova", "number": 1}\nb = {"number": 1, "street": "Lomonosova"}\nprint(a == b)', options: ['True', 'False', 'TypeError', 'None'], answer: 0, explain: '<code>==</code> compares dictionaries by <b>content</b>; the order of keys does not matter.' },
+    { data: 'travel', code: 'print(len(travel["Riga"]))', options: ['3', '6', '1.5', '7'], answer: 0, explain: '<code>travel["Riga"]</code> is the dictionary of Riga\'s neighbours — its length is the <b>degree</b> of Riga.' },
+    { data: 'travel', code: 'print("Helsinki" in travel["Riga"])', options: ['False', 'True', "KeyError: 'Helsinki'", '2.0'], answer: 0, explain: '<code>in</code> checks the keys of <code>travel["Riga"]</code>: Tallinn, Vilnius, Stockholm. No direct Riga–Helsinki edge.' },
+    { data: 'cities', code: 'for name, info in cities.items():\n    print(name, info["area"])', prompt: 'What is the first line printed?', options: ['Riga 307', 'Riga 605000', "Riga {'population': 605000, 'area': 307}", 'population 307'], answer: 0, explain: '<code>.items()</code> gives (key, value) pairs: <code>name</code> is <code>"Riga"</code>, <code>info</code> the inner dictionary, <code>info["area"]</code> is 307.' },
+    { data: 'product', code: 'import json\ntext = json.dumps(product)\nprint(type(text))', options: ["<class 'str'>", "<class 'dict'>", "<class 'json'>", "<class 'list'>"], answer: 0, explain: '<code>json.dumps</code> turns a Python object into JSON <b>text</b> (a string); <code>json.loads</code> turns it back.' },
+  ],
+  graph: [
+    { core: 1, pic: PIC.baltic, data: 'travel', prompt: 'What is the degree of Riga?', type: 'number', answer: 3, explain: 'Degree = number of neighbours: Tallinn, Vilnius, Stockholm → <code>len(travel["Riga"])</code> = 3.' },
+    { pic: PIC.baltic, data: 'travel', prompt: 'Is there a direct connection Riga – Helsinki?', options: ['True', 'False'], answer: 1, explain: '<code>"Helsinki" in travel["Riga"]</code> → <code>False</code>. You have to change in Tallinn.' },
+    { core: 2, pic: PIC.baltic, data: 'travel', prompt: 'Which city is the nearest neighbour of Tallinn?', options: ['Riga', 'Helsinki', 'Stockholm', 'Vilnius'], answer: 0, explain: 'Build <code>(hours, city)</code> pairs for Tallinn and take <code>min(pairs)</code> → <code>(1.0, "Riga")</code>.' },
+    { pic: PIC.baltic, data: 'travel', prompt: 'How many edges does the graph have?', type: 'number', answer: 7, explain: 'Sum of all degrees = 14; every edge is counted twice (once from each end) → 14 // 2 = 7.' },
+    { pic: PIC.baltic, data: 'travel', prompt: 'Which city has degree 1?', options: ['Warsaw', 'Helsinki', 'Vilnius', 'Riga'], answer: 0, explain: 'Warsaw is connected only to Vilnius: <code>len(travel["Warsaw"])</code> = 1.' },
+    { data: 'follows', prompt: 'Is this graph stored as directed or undirected?', options: ['Directed', 'Undirected'], answer: 0, explain: '<code>"janis" in follows["anna"]</code> is True but <code>"anna" in follows["janis"]</code> is False — the edge exists in <b>one</b> direction only.' },
+    { data: 'follows', prompt: 'Who follows marta?', options: ['anna, janis, olegs', 'anna only', 'anna and janis', 'janis and olegs'], answer: 0, explain: '"Who points to X?" needs a search through <b>all</b> lists: <code>"marta"</code> appears in the lists of anna, janis and olegs.' },
+    { core: 3, pic: PIC.office, prompt: 'The Lab gets a new door to the Kitchen (20 s). Which code adds it to the undirected graph <code>walk</code>?', codeOptions: true, options: ['walk["Lab"]["Kitchen"] = 20', 'walk["Lab"]["Kitchen"] = 20\nwalk["Kitchen"]["Lab"] = 20', 'walk["Lab"].append("Kitchen")', 'walk["Lab", "Kitchen"] = 20'], answer: 1, explain: 'Undirected = the edge must be stored from <b>both</b> ends. One assignment would make a one-way door.' },
+    { prompt: 'You must answer "how many hours from Riga to Stockholm?" in one step. Which representation?', options: ['dictionary of dictionaries  {"Riga": {"Stockholm": 1.5}}', 'edge list  [("Riga", "Stockholm", 1.5), ...]', 'dictionary of lists  {"Riga": ["Stockholm"]}', 'set of tuples  {("Riga", "Stockholm")}'], answer: 0, explain: 'Weighted adjacency: <code>travel["Riga"]["Stockholm"]</code> → 1.5. An edge list would need a loop to find the pair.' },
+    { prompt: 'What is this representation called?', code: 'edges = [("Riga", "Tallinn", 1.0),\n         ("Riga", "Vilnius", 1.0),\n         ("Tallinn", "Helsinki", 2.0)]', options: ['Edge list', 'Adjacency list', 'Weighted adjacency', 'Forest'], answer: 0, explain: 'A list of tuples, one per edge — good for storing, reading from a file and drawing. We built the adjacency dictionaries <b>from</b> it with a loop.' },
+  ],
+  tree: [
+    { core: 1, tree: 'catalogue', prompt: 'How many leaves (products) does this tree have?', type: 'number', answer: 8, explain: '2 laptops + 3 phones + 1 chair + 2 desks = 8. The data sits in the leaves.' },
+    { core: 2, tree: 'catalogue', prompt: 'How many <code>for</code> loops are needed to print the name of every product?', type: 'number', answer: 3, explain: 'One <code>for</code> per level: categories → subcategories → products. Depth of nesting = number of loops.' },
+    { tree: 'catalogue', prompt: 'What is the root of this tree?', options: ['catalogue — the whole dictionary', '"Electronics"', '"Laptops"', '"ProBook 15"'], answer: 0, explain: 'The root is the outer dictionary itself; <code>"Electronics"</code> and <code>"Furniture"</code> are its children.' },
+    { pic: () => PIC.tree(false), prompt: 'A tree has 12 vertices. How many edges does it have?', type: 'number', answer: 11, explain: 'Every vertex except the root has exactly one edge to its parent → <i>n</i> − 1 = 11.' },
+    { pic: PIC.forest, prompt: 'In Python a forest is simply…', options: ['a list of trees', 'a set of edges', 'a dictionary of lists', 'a tuple of strings'], answer: 0, explain: 'Trees that are not connected to each other → put them in a list: <code>forest = [tree1, tree2, tree3]</code>.' },
+    { pic: PIC.forest, prompt: 'A random forest makes its decision by…', options: ['a majority vote of many decision trees', 'picking the deepest tree', 'averaging the number of leaves', 'asking the root only'], answer: 0, explain: 'Many slightly different trees vote; one tree can be wrong, but a hundred rarely agree on the same mistake.' },
+    { core: 3, prompt: 'What is the decision for this customer?', code: 'customer = {"visits": 5, "last_purchase_days": 10, "newsletter": False}\n\nif customer["visits"] >= 10:\n    if customer["last_purchase_days"] > 30:\n        decision = "yes - loyal but inactive"\n    else:\n        decision = "no - already buying"\nelse:\n    if customer["newsletter"]:\n        decision = "yes - new and interested"\n    else:\n        decision = "no"', options: ["'yes - loyal but inactive'", "'no - already buying'", "'yes - new and interested'", "'no'"], answer: 3, explain: 'visits 5 → go to the <code>else</code> branch; newsletter False → <code>"no"</code>. A decision tree asks one question per node until a leaf answers.' },
+    { pic: PIC.cycle, prompt: 'Is this a tree?', options: ['No — it has a cycle', 'Yes', 'No — it is directed', 'No — it has weights'], answer: 0, explain: 'A–B–C–D–A is a cycle: two different paths join A and C. A tree has exactly one path between any two vertices.' },
+    { tree: 'catalogue', prompt: 'After <code>del catalogue["Electronics"]["Phones"]</code> — how many products remain?', type: 'number', answer: 5, explain: 'Pruning a branch removes all its leaves: 8 − 3 phones = 5.' },
+    { tree: 'catalogue', prompt: 'What is <code>type(catalogue["Furniture"]["Desks"][0])</code>?', options: ["<class 'dict'>", "<class 'list'>", "<class 'str'>", "<class 'int'>"], answer: 0, explain: '<code>["Desks"]</code> is a list of products; <code>[0]</code> is the first product — a dictionary with name and price.' },
+  ],
+};
+const ROUNDS = [
+  { id: 'name', n: '🖼️', title: 'Name it', desc: 'Picture → graph type, tree or forest', count: 5 },
+  { id: 'path', n: '🧭', title: 'Path finder', desc: 'Build the brackets to reach a value', count: 5 },
+  { id: 'prints', n: '🖨️', title: 'What prints?', desc: 'Predict the output — or the error', count: 6 },
+  { id: 'graph', n: '🕸️', title: 'Graph detective', desc: 'Degree, edges, neighbours, direction', count: 5 },
+  { id: 'tree', n: '🌲', title: 'Tree walk', desc: 'Leaves, loops, roots and forests', count: 5 },
+];
+
+/* ---------------- recap rendering ---------------- */
+document.getElementById('pic-record').innerHTML = PIC.record(true);
+document.getElementById('code-record').innerHTML = hl('product = ' + pyPretty(D.product, 0, '"', 50));
+document.getElementById('pic-undirected').innerHTML = PIC.undirected();
+document.getElementById('pic-directed').innerHTML = PIC.directed();
+document.getElementById('pic-weighted').innerHTML = PIC.weighted();
+document.getElementById('pic-disconnected').innerHTML = PIC.disconnected();
+document.getElementById('pic-tree').innerHTML = PIC.tree(true);
+document.getElementById('pic-forest').innerHTML = PIC.forest();
+document.getElementById('tree-catalogue').innerHTML = treeView('catalogue', D.catalogue);
+document.getElementById('code-walk').innerHTML =
+  '<span class="cm"># level 1: categories</span>\n' +
+  '<span class="lvl1">for category, subcats in catalogue.items():</span>\n' +
+  '    print(category)\n' +
+  '    <span class="cm"># level 2: subcategories</span>\n' +
+  '    <span class="lvl2">for subcat, products in subcats.items():</span>\n' +
+  '        print("   ", subcat)\n' +
+  '        <span class="cm"># level 3: products (a list!)</span>\n' +
+  '        <span class="lvl3">for product in products:</span>\n' +
+  '            <span class="lvl4">print("      ", product["name"],\n                    product["price"])</span>\n\n' +
+  '<span class="cm"># 3 levels of nesting = 3 for loops</span>';
+
+/* ---------------- tabs & theme ---------------- */
+const tabs = document.querySelectorAll('.tabs button');
+function showTab(id) {
+  tabs.forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id));
+  document.getElementById('tab-recap').classList.toggle('hidden', id !== 'recap');
+  document.getElementById('tab-game').classList.toggle('hidden', id !== 'game');
+  window.scrollTo({ top: 0 });
+}
+tabs.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+document.getElementById('toGame').addEventListener('click', () => showTab('game'));
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const r = document.documentElement, cur = r.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  r.dataset.theme = cur === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('cy23-theme', r.dataset.theme); } catch (e) {}
+});
+try { const t = localStorage.getItem('cy23-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+
+/* ---------------- game engine ---------------- */
+const G = { perRound: 3, queue: [], i: 0, score: 0, streak: 0, best: 0, results: {}, rounds: [], current: null, answered: false, attempts: 0 };
+const $ = id => document.getElementById(id);
+
+function buildRoundCards() {
+  $('roundCards').innerHTML = ROUNDS.map((r, i) => `<div class="rcard"><div class="n">${r.n}</div><h3>Round ${i + 1} · ${r.title}</h3><p>${r.desc}</p><p style="margin-top:6px">3 questions</p></div>`).join('');
+}
+buildRoundCards();
+$('playAll').addEventListener('click', () => startGame(ROUNDS.map(r => r.id)));
+
+function startGame(roundIds) {
+  G.rounds = roundIds; G.queue = []; G.i = 0; G.score = 0; G.streak = 0; G.best = 0; G.results = {};
+  for (const id of roundIds) {
+    const qs = Q[id].filter(q => q.core).sort((a, b) => a.core - b.core);   // only the questions marked core: 1..3
+    qs.forEach(q => G.queue.push(Object.assign({ round: id }, q)));
+    G.results[id] = { ok: 0, total: qs.length };
+  }
+  $('startScreen').classList.add('hidden'); $('endScreen').classList.add('hidden'); $('qScreen').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = G.current = G.queue[G.i]; G.answered = false; G.attempts = 0;
+  const rIdx = ROUNDS.findIndex(r => r.id === q.round), R = ROUNDS[rIdx];
+  $('roundTag').textContent = `Round ${rIdx + 1} · ${R.title}`;
+  $('qCount').textContent = `${G.i + 1} / ${G.queue.length}`;
+  $('progBar').style.width = (G.i / G.queue.length * 100) + '%';
+  $('score').textContent = G.score;
+  $('streak').textContent = G.streak >= 2 ? `🔥 ${G.streak} in a row` : '';
+  const fb = $('feedback'); fb.className = 'feedback'; fb.innerHTML = '';
+  $('nextRow').innerHTML = '';
+
+  let left = '', right = '';
+  if (q.round === 'name') {
+    $('prompt').textContent = 'What is the most precise name for this structure?';
+    left = `<div class="card">${q.pic()}</div>`;
+    right = optionsHtml(NAME_OPTS);
+  } else if (q.round === 'path') {
+    const t = q.target[q.target.length - 1];
+    const val = evalPath(q.data, q.target.map(([k, v]) => ({ kind: k, value: v }))).value;
+    $('prompt').innerHTML = `Build the expression that reaches the highlighted value <code>${esc(py(val, "'"))}</code>`;
+    left = treeView(q.name, q.data, q.target);
+    right = pathBuilderHtml(q);
+  } else if (q.round === 'prints') {
+    $('prompt').innerHTML = q.prompt || 'What does this code print?';
+    left = (q.data ? `<p class="small muted" style="margin:0 0 4px">Given:</p>${given(q.data, D[q.data])}` : '') + `<p class="small muted" style="margin:8px 0 4px">Code:</p>${codeBlock(q.code)}`;
+    right = optionsHtml(q.options, true);
+  } else {
+    $('prompt').innerHTML = q.prompt;
+    left = (q.pic ? `<div class="card">${q.pic()}</div>` : '') + (q.tree ? treeView(q.tree, D[q.tree]) : '') + (q.data ? given(q.data, D[q.data]) : '') + (q.code ? codeBlock(q.code) : '');
+    right = q.type === 'number' ? numberHtml() : optionsHtml(q.options, !!q.codeOptions || (q.options || []).some(o => /^[<'\[{]|^-?\d/.test(o)));
+  }
+  $('qBody').innerHTML = `<div class="qgrid"><div>${left}</div><div>${right}</div></div>`;
+  wireAnswer(q);
+}
+
+function optionsHtml(opts, mono = false) {
+  return `<div class="options">${opts.map((o, i) => `<button class="opt" data-i="${i}"><span class="k">${i + 1}</span>${mono ? `<code style="white-space:pre">${esc(o)}</code>` : esc(o)}</button>`).join('')}</div>`;
+}
+function numberHtml() {
+  return `<div class="numrow"><input type="number" id="numIn" inputmode="numeric" autocomplete="off" placeholder="?"><button class="btn" id="numGo">Check</button><span class="small muted">type a number, <kbd>Enter</kbd></span></div>`;
+}
+function pathBuilderHtml(q) {
+  const toks = tokensOf(q.data);
+  return `<div class="expr" id="expr"></div>
+    <div class="tokens" id="tokens">${toks.map((t, i) => `<button class="chip ${t.kind}" data-i="${i}">${esc(tokStr(t))}</button>`).join('')}</div>
+    <div class="numrow"><button class="btn ghost" id="undo">⌫ undo</button><button class="btn" id="check">Run ▶</button></div>
+    <div class="console" id="console" style="margin-top:12px"><span class="p">&gt;&gt;&gt; </span><span class="muted">click the brackets, then Run</span></div>`;
+}
+
+function wireAnswer(q) {
+  if (q.round === 'path') { wirePath(q); return; }
+  if (q.type === 'number') {
+    const go = () => { const v = $('numIn').value.trim(); if (v === '') return; judge(Number(v) === q.answer, `Your answer: ${v}. Correct: <b>${q.answer}</b>.`); $('numIn').disabled = true; $('numGo').disabled = true; };
+    $('numGo').addEventListener('click', go); $('numIn').addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); $('numIn').focus();
+    return;
+  }
+  const opts = q.round === 'name' ? NAME_OPTS : q.options;
+  const correct = q.round === 'name' ? NAME_OPTS.indexOf(q.answer) : q.answer;
+  document.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
+    if (G.answered) return;
+    const i = +b.dataset.i, ok = i === correct;
+    document.querySelectorAll('.opt').forEach(x => { x.disabled = true; if (+x.dataset.i === correct) x.classList.add('ok'); });
+    if (!ok) b.classList.add('bad');
+    judge(ok, ok ? '' : `Correct answer: <b>${esc(opts[correct])}</b>.`);
+  }));
+}
+
+function wirePath(q) {
+  let chosen = [];
+  const toks = tokensOf(q.data);
+  const render = () => { $('expr').innerHTML = `<span class="root">${esc(q.name)}</span>` + chosen.map(t => `<span class="tok">${esc(tokStr(t))}</span>`).join('') + '<span class="cursor"></span>'; };
+  render();
+  $('tokens').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { if (G.answered) return; chosen.push(toks[+b.dataset.i]); render(); }));
+  $('undo').addEventListener('click', () => { if (G.answered) return; chosen.pop(); render(); });
+  $('check').addEventListener('click', () => {
+    if (G.answered || chosen.length === 0) return;
+    G.attempts++;
+    const res = evalPath(q.data, chosen);
+    const exprTxt = q.name + chosen.map(tokStr).join('');
+    const con = $('console');
+    if (res.error) {
+      con.innerHTML = `<span class="p">&gt;&gt;&gt; </span>${esc(exprTxt)}\n<span class="err">${esc(res.error)}</span>`;
+      hint(res.error);
+      return;
+    }
+    const same = JSON.stringify(res.path) === JSON.stringify(q.target);
+    con.innerHTML = `<span class="p">&gt;&gt;&gt; </span>${esc(exprTxt)}\n<span class="out">${esc(py(res.value, "'"))}</span>`;
+    if (same) {
+      const first = G.attempts === 1;
+      judge(true, first ? '' : 'Solved after a retry — half points.', first ? 10 : 5);
+    } else {
+      hint(isC(res.value) ? 'That runs, but it returns a whole container — go one level deeper.' : 'That runs, but it is a different value. Check the highlighted row: which keys and positions lead to it?');
+    }
+  });
+  function hint(msg) {
+    const fb = $('feedback'); fb.className = 'feedback show bad';
+    fb.innerHTML = `<div class="verdict">Not yet</div><div class="small">${esc(msg)}${msg.startsWith('TypeError: list') ? ' — a <b>list</b> needs a position like <code>[0]</code>.' : msg.startsWith('KeyError') ? ' — that key is not in this dictionary. Look at the row just above the target.' : msg.startsWith('TypeError: \'') ? ' — you reached a plain value; remove the last bracket.' : ''}</div>`;
+  }
+}
+
+function judge(ok, extra, points = 10) {
+  G.answered = true;
+  const q = G.current;
+  if (ok) { G.score += points; G.streak++; G.best = Math.max(G.best, G.streak); G.results[q.round].ok++; } else G.streak = 0;
+  $('score').textContent = G.score;
+  const fb = $('feedback'); fb.className = 'feedback show ' + (ok ? 'ok' : 'bad');
+  fb.innerHTML = `<div class="verdict" style="color:var(--${ok ? 'ok' : 'bad'})">${ok ? pickOne(['Correct!', 'Yes!', 'Exactly.', 'Nice.', 'Right.']) : pickOne(['Not quite.', 'Close, but no.', 'Hmm, no.'])} ${ok ? `+${points}` : ''}</div><div>${extra ? extra + ' ' : ''}${q.explain}</div>`;
+  const last = G.i === G.queue.length - 1;
+  $('nextRow').innerHTML = `<span class="small muted">press <kbd>Enter</kbd></span><button class="btn" id="nextBtn">${last ? 'See results →' : 'Next →'}</button>`;
+  $('nextBtn').addEventListener('click', next);
+  $('nextBtn').focus();
+}
+const pickOne = a => a[Math.floor(Math.random() * a.length)];
+function next() { G.i++; if (G.i >= G.queue.length) endGame(); else showQuestion(); }
+
+function endGame() {
+  $('qScreen').classList.add('hidden');
+  const total = G.queue.length, ok = Object.values(G.results).reduce((s, r) => s + r.ok, 0), pct = Math.round(ok / total * 100);
+  const maxScore = total * 10;
+  const tier = pct === 100 ? { stars: 3, head: 'Flawless! 🏆', msg: 'Every bracket in its place. Dictionaries fear you. Functions are next — bring that energy to 3.1.' }
+    : pct >= 90 ? { stars: 3, head: 'You did it! 🎉', msg: 'Nested structures hold no secrets for you. The one you missed was probably a typo in your head.' }
+    : pct >= 75 ? { stars: 2, head: 'Almost there! 🚀', msg: 'Solid work. One more look at the rows you missed and you are ready for 3.1.' }
+    : pct >= 60 ? { stars: 2, head: 'Not bad at all 👍', msg: 'You know the ideas — the brackets just need a few more repetitions. Play again, the questions change.' }
+    : pct >= 40 ? { stars: 1, head: 'Warming up 🔥', msg: 'KeyError and IndexError are not your enemies, they are hints. Check the recap pictures, then try once more.' }
+    : { stars: 0, head: 'The tree won this time 🌲', msg: 'No worries — nested brackets are a skill, and skills need repetitions. Open the recap, then play again.' };
+  const stars = tier.stars, msg = tier.msg;
+  const advice = { name: 'Recap "Graphs — four types" and "Trees and forests": the type is about arrows, numbers and cycles.', path: 'Recap card 1: read brackets left to right; a list needs a position, a dictionary needs a key.', prints: 'Lesson 2.3 "Common mistakes with nested access" and "Copying nested structures".', graph: 'Lesson 2.3 "Questions we can answer with loops": degree = len(neighbours), edges = sum of degrees // 2.', tree: 'Lesson 2.3 "Walking the tree": one for per level; a tree with n vertices has n − 1 edges.' };
+  const rows = G.rounds.map(id => { const r = G.results[id], R = ROUNDS.find(x => x.id === id), p = Math.round(r.ok / r.total * 100); return `<tr><td>${R.n} ${R.title}</td><td style="width:40%"><div class="bar ${p < 60 ? 'low' : ''}"><div style="width:${p}%"></div></div></td><td class="r">${r.ok} / ${r.total}</td></tr>${p < 60 ? `<tr><td colspan="3" class="small muted" style="padding-top:0">↳ revisit: ${advice[id]}</td></tr>` : ''}`; }).join('');
+  $('endScreen').innerHTML = `<div style="text-align:center;padding:10px 0 6px">
+      <h2 style="font-size:34px;margin:0">${tier.head}</h2>
+      <div class="stars">${'★'.repeat(stars)}<span style="opacity:.25">${'★'.repeat(3 - stars)}</span></div>
+      <div style="font-size:64px;font-weight:800;line-height:1;color:var(--accent)">${G.score}<span style="font-size:22px;color:var(--muted);font-weight:600"> / ${maxScore} points</span></div>
+      <p style="margin-top:10px"><b>${ok} of ${total}</b> correct (${pct}%)${G.best >= 3 ? ` · best streak ${G.best} 🔥` : ''}</p>
+      <p style="max-width:560px;margin:4px auto 14px">${msg}</p>
+    </div>
+    <table class="res">${rows}</table>
+    <div class="next" style="justify-content:space-between;margin-top:18px"><button class="btn ghost" id="toRecap">Recap pictures</button><div style="display:flex;gap:10px"><button class="btn ghost" id="menu">Start screen</button><button class="btn" id="again">Play again ↻</button></div></div>`;
+  $('endScreen').classList.remove('hidden');
+  $('again').addEventListener('click', () => startGame(G.rounds));
+  $('menu').addEventListener('click', () => { $('endScreen').classList.add('hidden'); $('startScreen').classList.remove('hidden'); });
+  $('toRecap').addEventListener('click', () => { $('endScreen').classList.add('hidden'); $('startScreen').classList.remove('hidden'); showTab('recap'); });
+}
+
+/* keyboard: 1-6 pick an option, Enter = next / check */
+document.addEventListener('keydown', e => {
+  if ($('qScreen').classList.contains('hidden')) return;
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'Enter') { const nb = $('nextBtn'); if (nb) { nb.click(); e.preventDefault(); } else if ($('check') && !G.answered) $('check').click(); return; }
+  if (/^[1-9]$/.test(e.key) && !G.answered) { const b = document.querySelector(`.opt[data-i="${+e.key - 1}"]`); if (b) b.click(); }
+  if (e.key === 'Backspace' && $('undo') && !G.answered) { $('undo').click(); e.preventDefault(); }
+});
+</script>
+</body>
+</html>
