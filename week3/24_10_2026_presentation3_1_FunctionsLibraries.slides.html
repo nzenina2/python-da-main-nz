@@ -7454,6 +7454,13 @@ main {
 .jp-InputPrompt {
   flex: none;
 }
+/* --- inline code in markdown (fix 6): light text on a dark box, not white on grey --- */
+.reveal .jp-RenderedHTMLCommon :not(pre) > code{
+  background-color: rgba(255,255,255,0.16);
+  color: #FFE9A8;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
 /* --- fit the screen (fix 5) --- */
 .reveal img{
   max-height: 58vh;
